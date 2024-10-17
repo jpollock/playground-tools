@@ -1,5 +1,5 @@
 {
-	"name": "@wp-now/wp-now",
+	"name": "@elasticapi/wp-now",
 	"version": "0.1.74",
 	"description": "WordPress Playground CLI",
 	"repository": {

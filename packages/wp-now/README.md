@@ -14,7 +14,7 @@ Running `wp-now` is as simple as accessing your plugin or theme directory and ru
 
 ```bash
 cd my-plugin-or-theme-directory
-npx @wp-now/wp-now start
+npx @elasticapi/wp-now start
 ```
 
 ### Launch wp-now in the `wp-content` directory with options
@@ -23,7 +23,7 @@ You can also start `wp-now` from any `wp-content` folder. In this example, you p
 
 ```bash
 cd my-wordpress-folder/wp-content
-npx @wp-now/wp-now start  --wp=6.4 --php=8.0 --blueprint=path/to/blueprint-example.json
+npx @elasticapi/wp-now start  --wp=6.4 --php=8.0 --blueprint=path/to/blueprint-example.json
 ```
 
 ## Table of Contents
@@ -56,13 +56,13 @@ The minimum supported version of Node.js is 18. For Blueprint support, install N
 You don't have to install `wp-now`—you can run it with a single [npx](https://docs.npmjs.com/cli/v10/commands/npx) command. That's the recommended way to use `wp-now` and requires no installation or setup:
 
 ```bash
-npx @wp-now/wp-now start
+npx @elasticapi/wp-now start
 ```
 
-You can also install `@wp-now/wp-now` globally to run it from any directory:
+You can also install `@elasticapi/wp-now` globally to run it from any directory:
 
 ```bash
-npm install -g @wp-now/wp-now
+npm install -g @elasticapi/wp-now
 ```
 
 Once installed, start a new server like so:
@@ -73,12 +73,12 @@ wp-now start
 ```
 
 > [!IMPORTANT]  
-> Note the different syntax above. While the preceding `npx @wp-now/` isn't required after installing the package locally, `wp-now <command>` will produce an error without it.
+> Note the different syntax above. While the preceding `npx @elasticapi/` isn't required after installing the package locally, `wp-now <command>` will produce an error without it.
 
 Use the `--php=<version>` and `--wp=<version>` arguments to switch to different versions on the fly:
 
 ```bash
-npx @wp-now/wp-now start --wp=5.9 --php=7.4
+npx @elasticapi/wp-now start --wp=5.9 --php=7.4
 ```
 
 In supported modes, `wp-now` creates a persistent SQLite database and `wp-content` directory in `~/.wp-now`.
@@ -89,7 +89,7 @@ Use `wp-now php <file>` to execute a specific PHP file:
 
 ```bash
 cd wordpress-plugin-or-theme
-npx @wp-now/wp-now php my-file.php
+npx @elasticapi/wp-now php my-file.php
 ```
 
 ### Automatic modes
@@ -110,13 +110,13 @@ Here are the heuristics for each mode: - **plugin** mode: Presence of a PHP file
 You can run `wp-now` with the `--help` flag to get an overview of all the available options.
 
 ```bash
-npx @wp-now/wp-now --help
+npx @elasticapi/wp-now --help
 
 # or
-npx @wp-now/wp-now start --help
+npx @elasticapi/wp-now start --help
 
 # or
-npx @wp-now/wp-now php --help
+npx @elasticapi/wp-now php --help
 ```
 
 `wp-now start` supports the following optional arguments:
@@ -168,7 +168,7 @@ You can prototype and test your Blueprint in a [dedicated online editor](https:/
 To run it, create a file named `blueprint-example.json` and run the following command:
 
 ```bash
-npx @wp-now/wp-now start --blueprint=path/to/blueprint-example.json
+npx @elasticapi/wp-now start --blueprint=path/to/blueprint-example.json
 ```
 
 ### Define custom URLs in a Blueprint
@@ -205,7 +205,7 @@ You can use this instance with [`ngrok`](https://ngrok.com/docs):
 You can also define a different port:
 
 ```bash
-npx @wp-now/wp-now start --blueprint=path/to/blueprint-example.json --port=80
+npx @elasticapi/wp-now start --blueprint=path/to/blueprint-example.json --port=80
 ```
 
 The Blueprint to listen on port `80` would look like this:
@@ -301,7 +301,6 @@ Here's what you need to know if you're migrating from `wp-env`:
 -   `wp-now` supports non-WordPress projects.
 -   `wp-now` does not require Docker.
 -   `wp-now` does not include [lifecycle scripts](https://developer.wordpress.org/block-editor/reference-guides/packages/packages-env/#node-lifecycle-script).
-
 
 ## Contributing
 
