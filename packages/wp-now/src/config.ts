@@ -18,7 +18,9 @@ export interface CliOptions {
 	php?: string;
 	path?: string;
 	wp?: string;
+	siteUrl?: string;
 	port?: number;
+	forceSsl?: boolean;
 	blueprint?: string;
 	reset?: boolean;
 }
@@ -39,6 +41,8 @@ export interface WPNowOptions {
 	documentRoot?: string;
 	absoluteUrl?: string;
 	mode?: WPNowMode;
+	siteUrl?: string;
+	forceSsl?: boolean;
 	port?: number;
 	projectPath?: string;
 	wpContentPath?: string;
@@ -117,6 +121,8 @@ export default async function getWpNowConfig(
 		phpVersion: args.php as SupportedPHPVersion,
 		projectPath: args.path as string,
 		wordPressVersion: args.wp as string,
+		siteUrl: args.siteUrl as string,
+		forceSsl: args.forceSsl as boolean,
 		port,
 		reset: args.reset as boolean,
 	};

@@ -66,6 +66,25 @@ export async function startServer(
 				body: await requestBodyToBytes(req),
 			};
 
+			//Get the external URL from environment variable or default to http://localhost
+			const externalUrl = new URL(
+				process.env.SITE_URL || options.absoluteUrl
+			);
+
+			//Set the correct Host header
+			data.headers['host'] = externalUrl.host;
+
+			// Set X-Forwarded-Proto to help WordPress detect the correct protocol
+			data.headers['x-forwarded-proto'] = externalUrl.protocol.slice(
+				0,
+				-1
+			); // remove the trailing ':'
+
+			// Remove any existing origin header to prevent conflicts
+			delete data.headers['origin'];
+
+			options.absoluteUrl = process.env.SITE_URL || options.absoluteUrl;
+
 			if (isWebContainer()) {
 				// Unlike a typical Nginx or reverse proxy setup, WebContainers
 				// overwrite the Host header sent by the browser with a localhost

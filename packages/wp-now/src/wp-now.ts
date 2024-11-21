@@ -177,6 +177,7 @@ async function runWpContentMode(
 		wpContentPath,
 		projectPath,
 		absoluteUrl,
+		siteUrl,
 	}: WPNowOptions
 ) {
 	const wordPressPath = path.join(
@@ -184,7 +185,7 @@ async function runWpContentMode(
 		wordPressVersion
 	);
 	php.mount(wordPressPath, documentRoot);
-	await initWordPress(php, wordPressVersion, documentRoot, absoluteUrl);
+	await initWordPress(php, wordPressVersion, documentRoot, siteUrl);
 	fs.ensureDirSync(wpContentPath);
 
 	php.mount(projectPath, `${documentRoot}/wp-content`);
@@ -283,14 +284,14 @@ async function runPluginOrThemeMode(
 
 async function runWpPlaygroundMode(
 	php: NodePHP,
-	{ documentRoot, wordPressVersion, wpContentPath, absoluteUrl }: WPNowOptions
+	{ documentRoot, wordPressVersion, wpContentPath, siteUrl }: WPNowOptions
 ) {
 	const wordPressPath = path.join(
 		getWordpressVersionsPath(),
 		wordPressVersion
 	);
 	php.mount(wordPressPath, documentRoot);
-	await initWordPress(php, wordPressVersion, documentRoot, absoluteUrl);
+	await initWordPress(php, wordPressVersion, documentRoot, siteUrl);
 
 	fs.ensureDirSync(wpContentPath);
 	fs.copySync(
@@ -331,9 +332,37 @@ async function initWordPress(
 		initializeDefaultDatabase = true;
 	}
 
+	// Read the current wp-config.php content
+	const wpConfigContent = php.readFileAsText(
+		`${vfsDocumentRoot}/wp-config.php`
+	);
+
+	// Define the HTTPS configuration
+	const httpsConfig = `
+/* Turn HTTPS 'on'! if HTTP_X_FORWARDED_PROTO matches 'https' */
+if (strpos($_SERVER['HTTP_X_FORWARDED_PROTO'], 'https') !== false) {
+	$_SERVER['HTTPS'] = 'on';
+}
+
+`;
+
+	// Find the position to insert the HTTPS configuration
+	const wpSettingsInclude =
+		'/** Sets up WordPress vars and included files. */';
+	const updatedContent = wpConfigContent.replace(
+		wpSettingsInclude,
+		httpsConfig + wpSettingsInclude
+	);
+
+	//console.log(updatedContent);
+	// Write the updated content back to wp-config.php
+	php.writeFile(`${vfsDocumentRoot}/wp-config.php`, updatedContent);
+
 	const wpConfigConsts = {
 		WP_HOME: siteUrl,
 		WP_SITEURL: siteUrl,
+		FORCE_SSL_ADMIN: true,
+		FORCE_SSL_LOGIN: true,
 	};
 	if (wordPressVersion !== 'user-defined') {
 		wpConfigConsts['WP_AUTO_UPDATE_CORE'] = wordPressVersion === 'latest';

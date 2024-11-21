@@ -63,6 +63,10 @@ export async function runCli() {
 					describe: "WordPress version to use: e.g. '--wp=6.2'",
 					type: 'string',
 				});
+				yargs.option('siteUrl', {
+					describe: 'Site URL',
+					type: 'string',
+				});
 				yargs.option('port', {
 					describe: 'Server port',
 					type: 'number',
@@ -113,6 +117,7 @@ export async function runCli() {
 						path: argv.path as string,
 						php: argv.php as SupportedPHPVersion,
 						wp: argv.wp as string,
+						siteUrl: argv.siteUrl as string,
 						port: argv.port as number,
 						blueprint: argv.blueprint as string,
 						reset: argv.reset as boolean,
@@ -146,6 +151,7 @@ export async function runCli() {
 					const options = await getWpNowConfig({
 						path: argv.path as string,
 						php: argv.php as SupportedPHPVersion,
+						siteUrl: argv.siteUrl as string,
 					});
 					const phpArgs = args.includes('--')
 						? (argv._ as string[])
