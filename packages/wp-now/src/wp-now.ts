@@ -339,28 +339,55 @@ async function initWordPress(
 
 	// Define the HTTPS configuration
 	const httpsConfig = `
-/* Turn HTTPS 'on'! if HTTP_X_FORWARDED_PROTO matches 'https' */
-if (strpos($_SERVER['HTTP_X_FORWARDED_PROTO'], 'https') !== false) {
-	$_SERVER['HTTPS'] = 'on';
-}
+	/* Turn HTTPS 'on'! if HTTP_X_FORWARDED_PROTO matches 'https' */
+	if (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && strpos($_SERVER['HTTP_X_FORWARDED_PROTO'], 'https') !== false) {
+		$_SERVER['HTTPS'] = 'on';
+	}
+	if (isset($_SERVER['HTTP_X_FORWARDED_PORT']) && strpos($_SERVER['HTTP_X_FORWARDED_PORT'], '443') !== false) {
+	  $_SERVER['HTTPS'] = 'on';
+	}
 
-`;
+	/** A couple extra tweaks to help things run well. **/
+	if (isset($_SERVER['HTTP_HOST'])) {
+	  $scheme = 'http';
+	  if (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on') {
+		$scheme = 'https';
+	  }
+	  // If we have detected that the end use is HTTPS, make sure we pass that
+	  // through here, so <img> tags and the like don't generate mixed-mode
+	  // content warnings.
+	  if (isset($_SERVER['HTTP_USER_AGENT_HTTPS']) && $_SERVER['HTTP_USER_AGENT_HTTPS'] == 'ON') {
+		$scheme = 'https';
+		$_SERVER['HTTPS'] = 'on';
+	  }
+
+	  define('WP_SITEURL', $scheme . '://' . $_SERVER['HTTP_HOST']);
+	  define('WP_HOME', $scheme . '://' . $_SERVER['HTTP_HOST']);
+	}
+
+
+	`;
 
 	// Find the position to insert the HTTPS configuration
 	const wpSettingsInclude =
 		'/** Sets up WordPress vars and included files. */';
-	const updatedContent = wpConfigContent.replace(
-		wpSettingsInclude,
-		httpsConfig + wpSettingsInclude
+	const configAlreadyExists = wpConfigContent.includes(
+		"Turn HTTPS 'on'! if HTTP_X_FORWARDED_PROTO matches 'https'"
 	);
+	const updatedContent = configAlreadyExists
+		? wpConfigContent
+		: wpConfigContent.replace(
+				wpSettingsInclude,
+				httpsConfig + wpSettingsInclude
+		  );
 
 	//console.log(updatedContent);
 	// Write the updated content back to wp-config.php
 	php.writeFile(`${vfsDocumentRoot}/wp-config.php`, updatedContent);
 
 	const wpConfigConsts = {
-		WP_HOME: siteUrl,
-		WP_SITEURL: siteUrl,
+		//WP_HOME: siteUrl,
+		//WP_SITEURL: siteUrl,
 		FORCE_SSL_ADMIN: true,
 		FORCE_SSL_LOGIN: true,
 	};

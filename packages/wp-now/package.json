@@ -1,6 +1,6 @@
 {
 	"name": "@elasticapi/wp-now",
-	"version": "0.1.76",
+	"version": "0.1.87",
 	"description": "WordPress Playground CLI",
 	"repository": {
 		"type": "git",
@@ -23,5 +23,19 @@
 	"type": "module",
 	"main": "index.js",
 	"bin": "with-node-version.js",
-	"gitHead": "dc3e3bd36d631cdc7b653f634439ad6c30384f41"
+	"gitHead": "dc3e3bd36d631cdc7b653f634439ad6c30384f41",
+	"dependencies": {
+		"@php-wasm/node": "0.6.16",
+		"@php-wasm/universal": "0.6.16",
+		"@webcontainer/env": "1.1.1",
+		"@wp-playground/blueprints": "0.6.16",
+		"compressible": "2.0.18",
+		"compression": "1.7.4",
+		"express": "4.19.2",
+		"follow-redirects": "1.15.6",
+		"fs-extra": "11.1.1",
+		"hpagent": "1.2.0",
+		"unzipper": "0.10.11",
+		"yargs": "17.7.2"
+	}
 }

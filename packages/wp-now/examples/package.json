@@ -1,0 +1,20 @@
+{
+	"name": "wp-now-examples",
+	"version": "1.0.0",
+	"type": "module",
+	"description": "Examples of using wp-now in Node.js",
+	"private": true,
+	"scripts": {
+		"start": "node node-example.js"
+	},
+	"dependencies": {
+		"@php-wasm/node": "0.6.16",
+		"@php-wasm/universal": "0.6.16",
+		"@wp-playground/blueprints": "0.6.16",
+		"express": "4.19.2",
+		"compression": "1.7.4",
+		"compressible": "2.0.18",
+		"fs-extra": "11.1.1",
+		"@wp-now/wp-now": "0.1.74"
+	}
+}

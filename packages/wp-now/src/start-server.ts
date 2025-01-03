@@ -36,20 +36,25 @@ function shouldCompress(_, res) {
 }
 
 export async function startServer(
-	options: WPNowOptions = {}
+	options: WPNowOptions & { app?: express.Application } = {}
 ): Promise<WPNowServer> {
 	if (!fs.existsSync(options.projectPath)) {
 		throw new Error(
 			`The given path "${options.projectPath}" does not exist.`
 		);
 	}
-	const app = express();
+	const app = options.app || express();
 	app.use(compression({ filter: shouldCompress }));
 	app.use(addTrailingSlash('/wp-admin'));
-	const port = await portFinder.getOpenPort();
+	const port = options.port || (await portFinder.getOpenPort());
 	const { php, options: wpNowOptions } = await startWPNow(options);
 
-	app.use('/', async (req, res) => {
+	// Handle WordPress requests after any custom routes
+	app.use('/', async (req, res, next) => {
+		// Skip if the request is for the API endpoints
+		if (req.path.startsWith('/api/')) {
+			return next();
+		}
 		try {
 			const requestHeaders = {};
 			if (req.rawHeaders && req.rawHeaders.length) {
@@ -72,13 +77,12 @@ export async function startServer(
 			);
 
 			//Set the correct Host header
-			data.headers['host'] = externalUrl.host;
+			data.headers['host'] = data.headers['host'] || externalUrl.host;
 
 			// Set X-Forwarded-Proto to help WordPress detect the correct protocol
-			data.headers['x-forwarded-proto'] = externalUrl.protocol.slice(
-				0,
-				-1
-			); // remove the trailing ':'
+			data.headers['x-forwarded-proto'] =
+				data.headers['x-forwarded-proto'] ||
+				externalUrl.protocol.slice(0, -1); // remove the trailing ':'
 
 			// Remove any existing origin header to prevent conflicts
 			delete data.headers['origin'];
