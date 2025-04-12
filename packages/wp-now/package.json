@@ -1,6 +1,6 @@
 {
 	"name": "@elasticapi/wp-now",
-	"version": "0.1.88",
+	"version": "0.1.77",
 	"description": "WordPress Playground CLI",
 	"repository": {
 		"type": "git",
