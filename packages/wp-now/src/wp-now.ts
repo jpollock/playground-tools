@@ -324,18 +324,34 @@ async function initWordPress(
 	siteUrl: string
 ) {
 	let initializeDefaultDatabase = false;
+	let wpConfigContent = '';
 	if (!php.fileExists(`${vfsDocumentRoot}/wp-config.php`)) {
-		php.writeFile(
-			`${vfsDocumentRoot}/wp-config.php`,
-			php.readFileAsText(`${vfsDocumentRoot}/wp-config-sample.php`)
+		wpConfigContent = php.readFileAsText(
+			`${vfsDocumentRoot}/wp-config-sample.php`
 		);
 		initializeDefaultDatabase = true;
+	} else {
+		// Read the existing wp-config.php content if it exists
+		wpConfigContent = php.readFileAsText(
+			`${vfsDocumentRoot}/wp-config.php`
+		);
 	}
 
-	// Read the current wp-config.php content
-	const wpConfigContent = php.readFileAsText(
-		`${vfsDocumentRoot}/wp-config.php`
+	// --- Modify WP_DEBUG and add related constants ---
+	// Ensure WP_DEBUG is true
+	wpConfigContent = wpConfigContent.replace(
+		/define\(\s*'WP_DEBUG',\s*false\s*\);/g,
+		"define( 'WP_DEBUG', true );"
 	);
+
+	// Add other debug constants if WP_DEBUG_LOG is not already defined
+	if (!wpConfigContent.includes("define( 'WP_DEBUG_LOG'")) {
+		wpConfigContent = wpConfigContent.replace(
+			/define\(\s*'WP_DEBUG',\s*true\s*\);/g,
+			"define( 'WP_DEBUG', true );\ndefine( 'WP_DEBUG_LOG', true );\ndefine( 'WP_DEBUG_DISPLAY', false );\n@ini_set( 'display_errors', 0 );"
+		);
+	}
+	// --- End Debug Modification ---
 
 	// Define the HTTPS configuration
 	const httpsConfig = `
@@ -381,23 +397,37 @@ async function initWordPress(
 				httpsConfig + wpSettingsInclude
 		  );
 
-	//console.log(updatedContent);
-	// Write the updated content back to wp-config.php
+	// Write the final updated content back to wp-config.php
+	// Note: The variable 'updatedContent' now holds the content with both
+	// debug and HTTPS modifications applied correctly earlier in the function.
 	php.writeFile(`${vfsDocumentRoot}/wp-config.php`, updatedContent);
 
+	// Define other constants using the blueprint function
 	const wpConfigConsts = {
-		//WP_HOME: siteUrl,
+		//WP_HOME: siteUrl, // These are now handled by the HTTPS block added earlier
 		//WP_SITEURL: siteUrl,
 		FORCE_SSL_ADMIN: true,
 		FORCE_SSL_LOGIN: true,
+		// Debug constants are now directly in wp-config.php
 	};
 	if (wordPressVersion !== 'user-defined') {
 		wpConfigConsts['WP_AUTO_UPDATE_CORE'] = wordPressVersion === 'latest';
 	}
-	await defineWpConfigConsts(php, {
-		consts: wpConfigConsts,
-		method: 'define-before-run',
-	});
+	// Only call defineWpConfigConsts if there are constants left to define
+	if (Object.keys(wpConfigConsts).length > 0) {
+		await defineWpConfigConsts(php, {
+			consts: wpConfigConsts,
+			method: 'define-before-run',
+		});
+	}
+
+	// Ensure the debug log file exists and is writable
+	const debugLogPath = `${vfsDocumentRoot}/wp-content/debug.log`;
+	if (!php.fileExists(debugLogPath)) {
+		php.writeFile(debugLogPath, ''); // Create empty file if it doesn't exist
+	}
+	// Note: File permissions in the WASM VFS might not strictly apply,
+	// but ensuring the file exists is important.
 
 	return { initializeDefaultDatabase };
 }
